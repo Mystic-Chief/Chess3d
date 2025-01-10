@@ -1,0 +1,38 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+env/
+venv/
+
+# Logs and databases
+*.log
+*.sqlite3
+
+# Assets and system-specific files
+*.DS_Store
+Thumbs.db
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# Python egg metadata
+*.egg-info/
+.eggs/
+
+# Build and distribution files
+build/
+dist/
+*.egg
+*.whl
+
+# OS-specific swap files
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.bak
+*.old
