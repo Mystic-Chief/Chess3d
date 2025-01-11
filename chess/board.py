@@ -1,9 +1,14 @@
 from chess.pieces import Pawn, Rook, Knight, Bishop, Queen, King
-
 class Board:
     def __init__(self):
         # Create an 8x8 board initialized with None
         self.board = [[None for _ in range(8)] for _ in range(8)]
+
+    def reset(self):
+        """Reset the board and pieces to their initial state."""
+        # Create a new board instance, ensuring all previous state is cleared
+        self.board = [[None for _ in range(8)] for _ in range(8)]  # Clear the board
+        self.setup()  # Call the setup method to place pieces in their starting positions
 
     def setup(self):
         """Set up the initial chess positions."""

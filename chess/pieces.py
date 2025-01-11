@@ -13,23 +13,39 @@ class Piece:
         raise NotImplementedError
 
 class Pawn(Piece):
+    def __init__(self, color):
+        super().__init__(color)
+        self.has_moved = False  # Track if the pawn has moved
+
     def valid_moves(self, pos, board):
         row, col = pos
         direction = -1 if self.color == "white" else 1
         moves = []
-        
+
         # Move one square forward
         if board.board[row + direction][col] is None:
             moves.append((row + direction, col))
-        
+
+        # Move two squares forward on the pawn's first move
+        if not self.has_moved and board.board[row + 2 * direction][col] is None:
+            # Ensure the pawn isn't blocked by another piece
+            if row == (1 if self.color == "black" else 6):
+                moves.append((row + 2 * direction, col))
+
         # Capture diagonally
         for dc in [-1, 1]:
             if 0 <= col + dc < 8 and 0 <= row + direction < 8:
                 target = board.board[row + direction][col + dc]
                 if target and target.color != self.color:
                     moves.append((row + direction, col + dc))
-        
+
         return moves
+
+    def move(self, start, end, board):
+        """Update the pawn's position and mark it as moved"""
+        super().move(start, end, board)
+        self.has_moved = True  # Mark the pawn as having moved
+
 
 class Rook(Piece):
     def valid_moves(self, pos, board):

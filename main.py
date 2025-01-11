@@ -79,6 +79,17 @@ def highlight_moves(win, moves, board, selected_piece):
         
         win.blit(highlight_surface, (col * SQUARE_SIZE, row * SQUARE_SIZE))
 
+# Reset the board to the initial setup
+def reset_board(board):
+    # Reinitialize the board from scratch by clearing it first
+    board.board = [[None for _ in range(8)] for _ in range(8)]  # Clear the board
+    board.setup()  # Reapply the initial setup
+    return None, None, 'white'
+
+# Check if the game is over (e.g., checkmate or stalemate)
+def is_game_over(board):
+    # Implement game over logic here
+    return False
 
 # Main game loop
 def main():
@@ -116,12 +127,18 @@ def main():
                     if piece and piece.color == turn:
                         selected_piece = piece
                         selected_pos = (row, col)
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:  # Press 'R' to reset the game
+                    selected_piece, selected_pos, turn = reset_board(board)
 
         draw_board(win)
         if selected_piece:
             valid_moves = selected_piece.valid_moves(selected_pos, board)
             highlight_moves(win, valid_moves, board, selected_piece)
         draw_pieces(win, board, pieces)
+        if is_game_over(board):
+            print("Game Over")
+            running = False
         pygame.display.update()
         clock.tick(30)
 
