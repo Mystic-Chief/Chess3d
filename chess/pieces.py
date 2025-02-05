@@ -5,57 +5,53 @@ class Piece:
         self.color = color
 
     def valid_moves(self, pos, board):
-        """This method should be overridden by each piece subclass"""
+        """Override in subclasses."""
         raise NotImplementedError
-
+    
     def capture_moves(self, pos, board):
-        """This method should return capture moves"""
+        """Override in subclasses."""
         raise NotImplementedError
 
 class Pawn(Piece):
     def __init__(self, color):
         super().__init__(color)
-        self.has_moved = False  # Track if the pawn has moved
+        self.has_moved = False
 
     def valid_moves(self, pos, board):
         row, col = pos
         direction = -1 if self.color == "white" else 1
         moves = []
-
-        # Move one square forward
-        if board.board[row + direction][col] is None:
+        
+        # One square forward
+        if 0 <= row + direction < 8 and board.board[row + direction][col] is None:
             moves.append((row + direction, col))
-
-        # Move two squares forward on the pawn's first move
-        if not self.has_moved and board.board[row + 2 * direction][col] is None:
-            # Ensure the pawn isn't blocked by another piece
-            if row == (1 if self.color == "black" else 6):
-                moves.append((row + 2 * direction, col))
-
-        # Capture diagonally
-        for dc in [-1, 1]:
-            if 0 <= col + dc < 8 and 0 <= row + direction < 8:
-                target = board.board[row + direction][col + dc]
+        
+        # Two squares forward (only if not moved)
+        if not self.has_moved and 0 <= row + 2 * direction < 8 and board.board[row + 2 * direction][col] is None:
+            moves.append((row + 2 * direction, col))
+        
+        # Capturing diagonally
+        for dcol in [-1, 1]:
+            if 0 <= col + dcol < 8 and 0 <= row + direction < 8:
+                target = board.board[row + direction][col + dcol]
                 if target and target.color != self.color:
-                    moves.append((row + direction, col + dc))
-
+                    moves.append((row + direction, col + dcol))
+        
         return moves
-
-    def move(self, start, end, board):
-        """Update the pawn's position and mark it as moved"""
-        super().move(start, end, board)
-        self.has_moved = True  # Mark the pawn as having moved
-
+    
+    def capture_moves(self, pos, board):
+        return self.valid_moves(pos, board)
 
 class Rook(Piece):
     def valid_moves(self, pos, board):
+        return self._linear_moves(pos, board, [(1,0), (-1,0), (0,1), (0,-1)])
+
+    def _linear_moves(self, pos, board, directions):
         row, col = pos
         moves = []
-        # Horizontal and vertical moves
-        for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-            r, c = row, col
-            while 0 <= r + dr < 8 and 0 <= c + dc < 8:
-                r, c = r + dr, c + dc
+        for dr, dc in directions:
+            r, c = row + dr, col + dc
+            while 0 <= r < 8 and 0 <= c < 8:
                 if board.board[r][c] is None:
                     moves.append((r, c))
                 elif board.board[r][c].color != self.color:
@@ -63,55 +59,44 @@ class Rook(Piece):
                     break
                 else:
                     break
+                r += dr
+                c += dc
         return moves
-
+    
+class Bishop(Piece):
+    def valid_moves(self, pos, board):
+        return self._linear_moves(pos, board, [(1,1), (-1,-1), (1,-1), (-1,1)])
+    
+class Queen(Piece):
+    def valid_moves(self, pos, board):
+        return self._linear_moves(pos, board, [(1,0), (-1,0), (0,1), (0,-1), (1,1), (-1,-1), (1,-1), (-1,1)])
+    
 class Knight(Piece):
     def valid_moves(self, pos, board):
         row, col = pos
         moves = []
-        for dr, dc in [(-2, -1), (-2, 1), (2, -1), (2, 1), (-1, -2), (1, -2), (-1, 2), (1, 2)]:
+        offsets = [(2,1), (2,-1), (-2,1), (-2,-1), (1,2), (1,-2), (-1,2), (-1,-2)]
+        
+        for dr, dc in offsets:
             r, c = row + dr, col + dc
             if 0 <= r < 8 and 0 <= c < 8:
                 target = board.board[r][c]
                 if target is None or target.color != self.color:
                     moves.append((r, c))
+        
         return moves
-
-class Bishop(Piece):
-    def valid_moves(self, pos, board):
-        row, col = pos
-        moves = []
-        # Diagonal moves
-        for dr, dc in [(-1, -1), (-1, 1), (1, -1), (1, 1)]:
-            r, c = row, col
-            while 0 <= r + dr < 8 and 0 <= c + dc < 8:
-                r, c = r + dr, c + dc
-                if board.board[r][c] is None:
-                    moves.append((r, c))
-                elif board.board[r][c].color != self.color:
-                    moves.append((r, c))
-                    break
-                else:
-                    break
-        return moves
-
-class Queen(Piece):
-    def valid_moves(self, pos, board):
-        # Queen is a combination of rook and bishop
-        row, col = pos
-        moves = []
-        for piece in [Rook(self.color), Bishop(self.color)]:
-            moves.extend(piece.valid_moves(pos, board))
-        return moves
-
+    
 class King(Piece):
     def valid_moves(self, pos, board):
         row, col = pos
         moves = []
-        for dr, dc in [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]:
+        offsets = [(1,0), (-1,0), (0,1), (0,-1), (1,1), (-1,-1), (1,-1), (-1,1)]
+        
+        for dr, dc in offsets:
             r, c = row + dr, col + dc
             if 0 <= r < 8 and 0 <= c < 8:
                 target = board.board[r][c]
                 if target is None or target.color != self.color:
                     moves.append((r, c))
+        
         return moves
